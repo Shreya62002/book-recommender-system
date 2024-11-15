@@ -1,51 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Book Recommender</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Book Recommender System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #1a1a1a, #2d2d2d);
+            color: white;
+        }
+        
+        .navbar {
+            background: linear-gradient(to right, #00a65a, #008d4c);
+            padding: 1rem;
+        }
+        
+        .navbar-brand, .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+        
+        .search-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .book-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 2rem;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 166, 90, 0.3);
+        }
+        
+        .book-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .rating {
+            color: #ffd700;
+            margin: 0.5rem 0;
+        }
+        
+        .amazon-button {
+            background: #ff9900;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+        
+        .amazon-button:hover {
+            background: #ff8400;
+        }
+        
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #00a65a;
+            color: white;
+        }
+        
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00c268;
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(0, 166, 90, 0.25);
+        }
+    </style>
 </head>
 <body>
-  <nav class="bg-gray-800 py-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <a href="/" class="text-white font-bold text-xl">[My Book Recommender]</a>
-      <ul class="flex space-x-4">
-        <li><a href="/" class="text-gray-400 hover:text-white">Home</a></li>
-        <li><a href="/recommend" class="text-gray-400 hover:text-white">Recommend</a></li>
-        <li><a href="/contact" class="text-gray-400 hover:text-white">Contact</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <div class="container mx-auto my-8">
-    <h1 class="text-4xl font-bold mb-4 text-white bg-gray-800 p-4">Recommend Books</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {% if data %}
-      {% for item in data %}
-      <div class="bg-white shadow-md rounded-lg">
-        <img src="{{ item[2] }}" alt="{{ item[0] }}" class="w-full h-64 object-cover rounded-t-lg">
-        <div class="p-4">
-          <h2 class="text-xl font-bold mb-2">{{ item[0] }}</h2>
-          <p class="text-gray-600 mb-4">by {{ item[1] }}</p>
-          <a href="https://www.amazon.com/s?k={{ item[0]|replace(' ', '+') }}" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Buy on Amazon</a>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book-reader me-2"></i>
+                Book Recommender
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/recommend"><i class="fas fa-magic me-1"></i> Recommend</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-envelope me-1"></i> Contact</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
-      {% endfor %}
-      {% endif %}
-    </div>
-  </div>
+    </nav>
 
-  <script>
-    $(document).ready(function() {
-      $(".card").hover(
-        function() {
-          $(this).find(".bg-gray-800").addClass("bg-gray-700");
-        },
-        function() {
-          $(this).find(".bg-gray-700").removeClass("bg-gray-700");
-        }
-      );
-    });
-  </script>
+    <div class="container">
+        <div class="search-container">
+            <h1 class="text-center mb-4">
+                <i class="fas fa-book me-2"></i>
+                Discover Your Next Read
+            </h1>
+            <form action="/recommend_books" method="post" class="mb-4">
+                <div class="input-group">
+                    <input name="user_input" type="text" class="form-control" 
+                           placeholder="Enter a book you enjoyed...">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-search me-1"></i> Find Books
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            {% if data %}
+                {% for i in data %}
+                <div class="col-md-3 mb-4">
+                    <div class="book-card">
+                        <img src="{{i[2]}}" alt="{{i[0]}}" class="book-image">
+                        <h5 class="mb-2">{{i[0]}}</h5>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="text-muted mb-3">{{i[1]}}</p>
+                        <a href="https://www.amazon.com/s?k={{i[0]|urlencode}}+{{i[1]|urlencode}}" 
+                           target="_blank" class="btn amazon-button">
+                            <i class="fab fa-amazon me-1"></i> View on Amazon
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
